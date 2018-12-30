@@ -1,4 +1,4 @@
-import { observable, observe } from "mobx";
+import { observable, observe, action, autorun } from "mobx";
 import { Panel } from "./Components/Panel/Panel";
 import { Render } from "../Shared/Render/Render";
 import { Grid } from "../Shared/Drawing/Grid";
@@ -22,46 +22,46 @@ interface ILayer {
 @CustomElementDecorator({
     selector: 'node-editor',
     template: `
-    <div class="app-layers"></div>
-    <div class="app-panels"></div>
-    <div class="app-side-bar"></div>
-    <div class="app-panel-editor">
-        <div class="body"></div>
-    </div>
+<div class="app-layers"></div>
+<div class="app-panels"></div>
+<div class="app-side-bar"></div>
+<div class="app-panel-editor">
+<div class="body"></div>
+</div>
 `,
     style: `
 canvas {
-    position: absolute;
-    min-width: 100vw;
-    min-height: 100vh;
+position: absolute;
+min-width: 100vw;
+min-height: 100vh;
 }
 
 .app-panel-editor {
-    display: none;
-    justify-content: center;
-    align-items: center;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.5);
-    z-index: 0;
+display: none;
+justify-content: center;
+align-items: center;
+position: fixed;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background: rgba(0,0,0,0.5);
+z-index: 0;
 }
 
 .app-panel-editor .body {
-    position: fixed;
-    margin: 0 20px;
-    width: calc(60% - 20px);
-    max-height: calc(94% - 20px);
-    overflow: scroll;
-    padding: 10px;
-    background: #fff;
-    border: 2px solid #ccc;
+position: fixed;
+margin: 0 20px;
+width: calc(60% - 20px);
+max-height: calc(94% - 20px);
+overflow: scroll;
+padding: 10px;
+background: #fff;
+border: 2px solid #ccc;
 }
 
 .app-panel-editor.active {
-    display: flex;
+display: flex;
 }
 `,
     useShadow: true
@@ -105,11 +105,60 @@ export default class App extends HTMLElement {
     connectedCallback() {
 
         this.addBackground();
-        this.addPanel();
+
+        this.loadFromLocalStorage();
+
         this.addMainUI();
 
         // When pannel are add or remove
-        observe(this.panels, () => {});
+        autorun(() => this.saveToLocalStorage());
+
+    }
+
+    saveToLocalStorage() {
+
+        const { panels, panelTypes } = this;
+
+        const _panels = JSON.stringify(panels.map(p => p.toJSON()));
+        const _panelsTypes = JSON.stringify(panelTypes.map(p => p.toJSON()));
+
+        localStorage.setItem('panels', _panels);
+        localStorage.setItem('panelsTypes', _panelsTypes);
+
+    }
+
+    @action.bound
+    loadFromLocalStorage() {
+
+        const  [panels, panelTypes] = [ localStorage.getItem('panels'), localStorage.getItem('panelsTypes') ];
+
+        if (!!panels) {
+
+            const arrPanels: { position: {x: number, y: number}, panelType: PanelType } [] = JSON.parse(panels);
+
+            arrPanels.forEach((obj)=> {
+                let {position, panelType } = obj;
+                const {x, y} = position;
+                panelType = new PanelType(panelType.name, panelType.options);
+
+                this.addPanel({ panelType, x, y });
+
+            });
+
+        }
+
+        if (!!panelTypes) {
+
+            const arrPanelsTypes = JSON.parse(panelTypes);
+
+            arrPanelsTypes.forEach((obj: PanelType) => {
+
+                this.addPanelType(new PanelType(obj.name, obj.options));
+
+            });
+
+        }
+
 
     }
 
@@ -125,18 +174,37 @@ export default class App extends HTMLElement {
         this.panelEditor.$createPannel.addEventListener('click', (e) => {
 
             e.preventDefault();
-            const panelType = this.panelEditor.getPanelType();
-            this.sidebar.addPanelType(panelType);
+            const panelType: PanelType = this.panelEditor.getPanelType();
+            this.addPanelType(panelType);
             this.panelEditorContainer.classList.toggle('active');
 
         });
 
+        window.addEventListener('new-panel', (event: CustomEvent) => {
+            this.addPanel(event.detail)
+        });
+
     }
 
-    addPanel() {
+    @action.bound
+    addPanelType(panelType: panelType) {
+
+        this.sidebar.addPanelType(panelType);
+        this.panelTypes.push(panelType);
+
+    }
+
+    @action.bound
+    addPanel(panelConfig: { panelType: PanelType, x: number, y: number }) {
 
         const panel = new Panel();
+
+        panel.setPanelType(panelConfig.panelType);
         this.panelContainers.appendChild(panel);
+
+        panel.setPosition(panelConfig.x, panelConfig.y);
+
+        this.panels.push(panel);
 
     }
 

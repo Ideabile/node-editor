@@ -1,5 +1,6 @@
 import { observable, action, observe } from "mobx";
 import { CustomElementDecorator } from "../../../Shared/CustomElement/CustomeElement";
+import { PanelType } from "../PanelType/PanelType";
 
 
 interface PanelPosition {
@@ -14,7 +15,7 @@ interface PanelPosition {
     selector: 'node-panel',
     template: `
 <div class="panel" id="02" draggable>
-    <h3 class="panel__title">Element one</h3>
+    <h3 class="panel__title"></h3>
 </div>
 `,
     style: `
@@ -42,11 +43,25 @@ interface PanelPosition {
 })
 export class Panel extends HTMLElement {
 
-    @observable position: object = { x: 0, y: 0};
+    @observable position: PanelPosition = { x: 0, y: 0};
+
+    @observable panelType: PanelType = new PanelType;
 
     private initialPosition: PanelPosition = { x: 0, y: 0 };
 
     private handler: any = null;
+
+    public toJSON() {
+
+        const { position, panelType } = this;
+        const {x, y} = position;
+
+        return {
+            position: {x, y},
+            panelType: panelType.toJSON(),
+        };
+
+    }
 
     get $el() {
 
@@ -56,6 +71,7 @@ export class Panel extends HTMLElement {
 
     connectedCallback() {
 
+        this.$title.innerHTML = this.panelType.name;
         this.bindEvents();
 
     }
@@ -72,12 +88,25 @@ export class Panel extends HTMLElement {
     }
 
     @action
+    public setPanelType(panelType: PanelType) {
+
+        this.panelType = panelType;
+
+    }
+
+    @action.bound
+    public setPosition(x: number, y: number) {
+
+        this.position = { x, y };
+
+    }
+
     private handleMouseMove = (event: MouseEvent) => {
 
-        this.position = {
-            x: event.clientX - this.initialPosition.x,
-            y: event.clientY - this.initialPosition.y
-        };
+        this.setPosition(
+            event.clientX - this.initialPosition.x,
+            event.clientY - this.initialPosition.y
+        );
 
     }
 
@@ -92,10 +121,18 @@ export class Panel extends HTMLElement {
 
     }
 
+    get $title(): HTMLElement {
+
+        return this.shadowRoot.querySelector('h3');
+
+    }
+
     private onMouseDown(event: MouseEvent) {
 
         this.initialPosition.x = event.clientX - this.$el.offsetLeft;
         this.initialPosition.y = event.clientY - this.$el.offsetTop;
+
+        if (this.handler) this.handler();
 
         this.handler = observe(this, 'position', () => this.move());
         window.addEventListener('mousemove', this.handleMouseMove, true);
@@ -105,6 +142,7 @@ export class Panel extends HTMLElement {
 
     private bindEvents() {
 
+        this.handler = observe(this, 'position', () => this.move());
         this.shadowRoot.addEventListener('mousedown', (event) => this.onMouseDown(event));
 
     }

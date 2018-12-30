@@ -21,12 +21,23 @@ export class PanelType {
 
     @observable public name: string;
 
-    @observable private options: IPanelTypeOption[];
+    @observable public options: IPanelTypeOption[];
 
     constructor(name: string = "", options: IPanelTypeOption[] = []) {
 
         this.name = name;
         this.options = options;
+
+    }
+
+    public toJSON() {
+
+        const {name, options} = this;
+
+        return {
+            name,
+            options,
+        };
 
     }
 
