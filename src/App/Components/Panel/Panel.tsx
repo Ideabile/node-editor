@@ -1,6 +1,8 @@
 import { observable, action, observe } from "mobx";
 import { CustomElementDecorator } from "../../../Shared/CustomElement/CustomeElement";
 import { PanelType } from "../PanelType/PanelType";
+import { Component } from "../../../Shared/Component/Component";
+import { ComponentRender } from "../../../Shared/Component/ComponentRender";
 
 
 interface PanelPosition {
@@ -11,35 +13,8 @@ interface PanelPosition {
 
 }
 
-@CustomElementDecorator({
-    selector: 'node-panel',
-    template: `
-<div class="panel" id="02" draggable>
-    <h3 class="panel__title"></h3>
-</div>
-`,
-    style: `
-.panel {
-    min-width: 200px;
-    position: absolute;
-    border-radius: 2px;
-    min-height: 200px;
-    border: 1px solid #000;
-    background-color: #333;
-}
-.panel__title {
-    font-size: 12px;
-    line-height: 20px;
-    padding: 4px;
-    min-height: 20px;
-    font-weight: bold;
-    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 0%, #333 50%);
-    margin: 0;
-    border-bottom: 1px solid #cacaca;
-    color: #FFF;
-}
-`,
-    useShadow: true
+@Component({
+    selector: 'node-panel'
 })
 export class Panel extends HTMLElement {
 
@@ -63,6 +38,42 @@ export class Panel extends HTMLElement {
 
     }
 
+    render(h: ComponentRender.h) {
+
+        const stylePanel = `left: ${this.position.x}; top: ${this.position.y};`;
+
+        return (<div class="panel" style={stylePanel} id="02" draggable>
+            <h3 class="panel__title">{this.panelType.name}</h3>
+        </div>);
+
+    }
+
+    style() {
+
+        return `
+        .panel {
+            min-width: 200px;
+            position: absolute;
+            border-radius: 2px;
+            min-height: 200px;
+            border: 1px solid #000;
+            background-color: #333;
+        }
+        .panel__title {
+            font-size: 12px;
+            line-height: 20px;
+            padding: 4px;
+            min-height: 20px;
+            font-weight: bold;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 0%, #333 50%);
+            margin: 0;
+            border-bottom: 1px solid #cacaca;
+            color: #FFF;
+        }`;
+
+
+    }
+
     get $el() {
 
         return this.shadowRoot.querySelector('.panel');
@@ -71,19 +82,7 @@ export class Panel extends HTMLElement {
 
     connectedCallback() {
 
-        this.$title.innerHTML = this.panelType.name;
         this.bindEvents();
-
-    }
-
-    private move() {
-
-        this.$el.style.left = this.position.x;
-        this.$el.style.top = this.position.y;
-
-        if (this.hasAttribute('data-connect')) {
-            // paintLine(node, document.getElementById(node.getAttribute('data-connect')));
-        }
 
     }
 
@@ -134,7 +133,7 @@ export class Panel extends HTMLElement {
 
         if (this.handler) this.handler();
 
-        this.handler = observe(this, 'position', () => this.move());
+        this.handler = observe(this, 'position', () => this.render());
         window.addEventListener('mousemove', this.handleMouseMove, true);
         window.addEventListener('mouseup', this.handleMouseUp);
 
@@ -142,8 +141,8 @@ export class Panel extends HTMLElement {
 
     private bindEvents() {
 
-        this.handler = observe(this, 'position', () => this.move());
-        this.shadowRoot.addEventListener('mousedown', (event) => this.onMouseDown(event));
+        this.handler = observe(this, 'position', () => this.render());
+        this.addEventListener('mousedown', (event) => this.onMouseDown(event));
 
     }
 

@@ -1,5 +1,5 @@
 import { observable, observe, action, autorun } from "mobx";
-import { Panel } from "./Components/Panel/Panel";
+import { Panel } from "./Components/Panel/Panel.tsx";
 import { Render } from "../Shared/Render/Render";
 import { Grid } from "../Shared/Drawing/Grid";
 import { ISize } from "../Shared/Drawing/ISize";
