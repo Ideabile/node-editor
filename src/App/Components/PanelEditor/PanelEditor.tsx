@@ -2,33 +2,22 @@ import { CustomElementDecorator } from "../../../Shared/CustomElement/CustomeEle
 import { PanelEditorOption } from "./PanelEditorOption";
 import { observable, observe, action } from "mobx";
 import { PanelType, IPanelTypeOption } from "../PanelType/PanelType";
+import { Component } from "../../../Shared/Component/Component";
 
-@CustomElementDecorator({
+@Component({
     selector: 'panel-editor',
-    template: `
-    <h1>Panel Type Editor</h1>
-    <p>Create new type of panels that are availabe on the node-editor.</p>
-    <hr/>
-    <form>
-        <label for="panel-name">Panel Type Name:</label>
-        <input name="panel-name" type="text" />
-        <div class="options"></div>
-        <hr/>
-        <div class="controls">
-            <button class="addPanelEditorOption">Add option <i class="fa fa-plus"></i></button>
-            <button class="createPanel">Create Panel</button>
-        </div>
-    </form>
-`,
-    style: `
-`,
-    useShadow: true
 })
 export class PanelEditor extends HTMLElement {
 
     @observable name: string = '';
 
     @observable options: PanelEditorOption[] = [new PanelEditorOption()];
+
+    style() {
+
+        return '';
+
+    }
 
     connectedCallback() {
 
@@ -43,6 +32,28 @@ export class PanelEditor extends HTMLElement {
         });
 
         this.$panelName.addEventListener('keyup', () => this.setPanelName());
+
+    }
+
+    render(h) {
+
+        return (
+            <div>
+                <h1>Panel Type Editor</h1>
+                <p>Create new type of panels that are availabe on the node-editor.</p>
+                <hr/>
+                <form>
+                    <label for="panel-name">Panel Type Name:</label>
+                    <input name="panel-name" type="text" />
+                    <div className="options"></div>
+                    <hr/>
+                    <div className="controls">
+                        <button className="addPanelEditorOption">Add option <i className="fa fa-plus"></i></button>
+                        <button className="createPanel">Create Panel</button>
+                    </div>
+                </form>
+            </div>
+        );
 
     }
 

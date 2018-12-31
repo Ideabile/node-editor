@@ -45,7 +45,7 @@ export class Panel extends HTMLElement {
             left: this.position.x
         };
 
-        return (<div className="panel" style={stylePanel} id="02" draggable>
+        return (<div className="panel" style={stylePanel} id="02">
             <h3 className="panel__title">{this.panelType.name}</h3>
         </div>);
 
@@ -131,8 +131,7 @@ export class Panel extends HTMLElement {
 
     private onMouseDown(event: MouseEvent) {
 
-        console.log(event);
-
+        event.preventDefault();
         this.initialPosition.x = event.clientX - this.$el.offsetLeft;
         this.initialPosition.y = event.clientY - this.$el.offsetTop;
 

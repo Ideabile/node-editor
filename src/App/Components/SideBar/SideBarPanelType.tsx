@@ -1,23 +1,28 @@
-import { CustomElementDecorator } from "../../../Shared/CustomElement/CustomeElement";
 import { observable, action, observe } from "mobx";
 import { PanelType } from "../PanelType/PanelType";
+import { Component } from "../../../Shared/Component/Component";
 
-@CustomElementDecorator({
+@Component({
     selector: 'sidebar-panel-type',
-    template: `
-<div draggable></div>
-`,
-    style: `
-div {
-    width: 100%;
-    height: 20px;
-}
-`,
-    useShadow: true
 })
 export class SideBarPanelType extends HTMLElement {
 
     @observable panelType: PanelType = new PanelType();
+
+    style() {
+       return `
+            div {
+                width: 100%;
+                height: 20px;
+            }
+       `;
+    }
+
+    render(h) {
+
+        return <div draggable></div>;
+
+    }
 
     get $el() {
 

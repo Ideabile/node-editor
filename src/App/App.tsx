@@ -4,9 +4,10 @@ import { Render } from "../Shared/Render/Render";
 import { Grid } from "../Shared/Drawing/Grid";
 import { ISize } from "../Shared/Drawing/ISize";
 import { CustomElementDecorator } from "../Shared/CustomElement/CustomeElement";
-import { SideBar } from "./Components/SideBar/SideBar";
-import { PanelEditor } from "./Components/PanelEditor/PanelEditor";
+import { SideBar } from "./Components/SideBar/SideBar.tsx";
+import { PanelEditor } from "./Components/PanelEditor/PanelEditor.tsx";
 import { PanelType } from "./Components/PanelType/PanelType";
+import { Component } from "../Shared/Component/Component";
 
 interface ILayer {
 
@@ -19,52 +20,8 @@ interface ILayer {
 }
 
 
-@CustomElementDecorator({
-    selector: 'node-editor',
-    template: `
-<div class="app-layers"></div>
-<div class="app-panels"></div>
-<div class="app-side-bar"></div>
-<div class="app-panel-editor">
-<div class="body"></div>
-</div>
-`,
-    style: `
-canvas {
-position: absolute;
-min-width: 100vw;
-min-height: 100vh;
-}
-
-.app-panel-editor {
-display: none;
-justify-content: center;
-align-items: center;
-position: fixed;
-top: 0;
-left: 0;
-right: 0;
-bottom: 0;
-background: rgba(0,0,0,0.5);
-z-index: 0;
-}
-
-.app-panel-editor .body {
-position: fixed;
-margin: 0 20px;
-width: calc(60% - 20px);
-max-height: calc(94% - 20px);
-overflow: scroll;
-padding: 10px;
-background: #fff;
-border: 2px solid #ccc;
-}
-
-.app-panel-editor.active {
-display: flex;
-}
-`,
-    useShadow: true
+@Component({
+    selector: 'node-editor'
 })
 export default class App extends HTMLElement {
 
@@ -77,6 +34,60 @@ export default class App extends HTMLElement {
     private sidebar: SideBar = new SideBar;
 
     private panelEditor: PanelEditor = new PanelEditor;
+
+    style() {
+
+        return `
+            .canvas {
+                position: absolute;
+                min-width: 100vw;
+                min-height: 100vh;
+            }
+
+            .app-panel-editor {
+                display: none;
+                justify-content: center;
+                align-items: center;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 0;
+            }
+
+            .app-panel-editor .body {
+                position: fixed;
+                margin: 0 20px;
+                width: calc(60% - 20px);
+                max-height: calc(94% - 20px);
+                overflow: scroll;
+                padding: 10px;
+                background: #fff;
+                border: 2px solid #ccc;
+            }
+
+            .app-panel-editor.active {
+                display: flex;
+            }
+        `;
+    }
+
+    render(h) {
+
+        return (
+            <div>
+                <div className="app-layers"></div>
+                <div className="app-panels"></div>
+                <div className="app-side-bar"></div>
+                <div className="app-panel-editor">
+                    <div className="body"></div>
+                </div>
+            </div>
+        );
+
+    }
 
     get layerContainer(): HTMLElement {
 
@@ -111,7 +122,12 @@ export default class App extends HTMLElement {
         this.addMainUI();
 
         // When pannel are add or remove
-        autorun(() => this.saveToLocalStorage());
+        autorun(() => {
+
+            this.render();
+            this.saveToLocalStorage();
+
+        });
 
     }
 
@@ -165,12 +181,13 @@ export default class App extends HTMLElement {
     addMainUI() {
 
         this.sideBarContainer.appendChild(this.sidebar);
-        this.panelEditorContainer.querySelector('.body').appendChild(this.panelEditor);
+        this.panelEditorContainer.appendChild(this.panelEditor);
         this.sidebar.$addPanelType.addEventListener('click', () => {
 
             this.panelEditorContainer.classList.toggle('active');
 
         });
+
         this.panelEditor.$createPannel.addEventListener('click', (e) => {
 
             e.preventDefault();
@@ -198,12 +215,9 @@ export default class App extends HTMLElement {
     addPanel(panelConfig: { panelType: PanelType, x: number, y: number }) {
 
         const panel = new Panel();
-
         panel.setPanelType(panelConfig.panelType);
-        this.panelContainers.appendChild(panel);
-
         panel.setPosition(panelConfig.x, panelConfig.y);
-
+        this.panelContainers.appendChild(panel);
         this.panels.push(panel);
 
     }

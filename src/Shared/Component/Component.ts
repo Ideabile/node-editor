@@ -31,9 +31,14 @@ export const Component = (config: ComponentConfig) => (cls: IComponent) => {
     const connectedCallback = cls.prototype.connectedCallback || noop;
     const disconnectedCallback = cls.prototype.disconnectedCallback || noop;
     const styleCallback = cls.prototype.style || noop;
-    const contentCallback = cls.prototype.render || noop;
+    const renderCallback = cls.prototype.render || noop;
 
-    cls.prototype.useShadow = cls.prototype.useShadow || true;
+    const render = function (tag = '', attr = {}) {
+
+        const content = Array.from(arguments).slice(2);
+        return h(tag, attr, content);
+
+    }
 
     cls.prototype.style = function(): HTMLElement {
 
@@ -55,18 +60,22 @@ ${style}`;
 
     }
 
-    const range = document.createRange();
-
     cls.prototype._lastRender = null;
 
+    cls.prototype.template = function() {
+
+        return renderCallback.call(this, render);
+
+    };
 
     cls.prototype.render = function() {
 
         const style = this.style();
-        const content = h('div', [contentCallback.call(this, h)]);
+        const content = this.template();
+
         const { _lastRender } = this;
 
-        if (this.useShadow && this.shadowRoot) {
+        if (this.shadowRoot) {
 
             const patches = diff(_lastRender, content);
             this.rootNode = patch(this.rootNode, patches);
@@ -85,20 +94,17 @@ ${style}`;
 
         this.shadowRoot.appendChild(this.rootNode);
 
-        return;
-
-
-    }
+    };
 
     cls.prototype.connectedCallback = function() {
-
-        this.render();
 
         if (this.componentWillMount) {
             this.componentWillMount();
         }
 
+        this.render();
         connectedCallback.call(this);
+
         if (this.componentDidMount) {
             this.componentDidMount();
         }
