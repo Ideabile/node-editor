@@ -1,4 +1,4 @@
-import { ComponentRender } from "./ComponentRender";
+import { h, diff, patch, create } from 'virtual-dom';
 
 interface ComponentConfig {
     selector:string;
@@ -15,12 +15,12 @@ const validateSelector = (selector: string) => {
 
 export interface IComponent {
 
-    render: (h: ComponentRender.h): string;
-    style: ?<string>;
+    render: (h: h) => any;
+    style: ?() => string;
 
 }
 
-export const Component = (config: CustomElementConfig) => (cls: <IComponent>) => {
+export const Component = (config: ComponentConfig) => (cls: IComponent) => {
 
     validateSelector(config.selector);
 
@@ -57,41 +57,36 @@ ${style}`;
 
     const range = document.createRange();
 
-    cls.prototype._shadow = null;
+    cls.prototype._lastRender = null;
 
 
     cls.prototype.render = function() {
 
         const style = this.style();
-        const content = contentCallback.call(this, ComponentRender.h);
-        const template = document.createElement('div');
+        const content = h('div', [contentCallback.call(this, h)]);
+        const { _lastRender } = this;
 
+        if (this.useShadow && this.shadowRoot) {
+
+            const patches = diff(_lastRender, content);
+            this.rootNode = patch(this.rootNode, patches);
+            this._lastRender = content;
+
+            return;
+        }
+
+        this.rootNode = create(content);
+        this._lastRender = content;
+        this.attachShadow({mode: 'open'});
 
         if (style) {
-            template.appendChild(style);
+            this.shadowRoot.appendChild(style);
         }
 
-        template.appendChild(content);
+        this.shadowRoot.appendChild(this.rootNode);
 
+        return;
 
-        //const clone = document.importNode(template.content, true);
-
-        if (this.useShadow && this._shadow) {
-            range.selectNodeContents(this._shadow);
-            range.deleteContents();
-            this._shadow.appendChild(template);
-            return;
-        }
-
-        if (this.useShadow) {
-
-            this._shadow = this.attachShadow({mode: 'open'});
-            this._shadow.appendChild(template);
-            return;
-
-        }
-
-        this.appendChild(template);
 
     }
 
