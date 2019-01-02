@@ -1,5 +1,5 @@
 import { CustomElementDecorator } from "../../../Shared/CustomElement/CustomeElement";
-import { PanelEditorOption } from "./PanelEditorOption";
+import { PanelEditorOption } from "./PanelEditorOption.tsx";
 import { observable, observe, action } from "mobx";
 import { PanelType, IPanelTypeOption } from "../PanelType/PanelType";
 import { Component } from "../../../Shared/Component/Component";
@@ -12,12 +12,6 @@ export class PanelEditor extends HTMLElement {
     @observable name: string = '';
 
     @observable options: PanelEditorOption[] = [new PanelEditorOption()];
-
-    style() {
-
-        return '';
-
-    }
 
     connectedCallback() {
 
@@ -38,7 +32,7 @@ export class PanelEditor extends HTMLElement {
     render(h) {
 
         return (
-            <div>
+            <div className="panel-editor">
                 <h1>Panel Type Editor</h1>
                 <p>Create new type of panels that are availabe on the node-editor.</p>
                 <hr/>
@@ -66,7 +60,7 @@ export class PanelEditor extends HTMLElement {
 
     private get $panelName(): HTMLInputElement {
 
-        return this.shadowRoot.querySelector('input[name="panel-name"]');
+        return this.querySelector('input[name="panel-name"]');
 
     }
 
@@ -89,25 +83,25 @@ export class PanelEditor extends HTMLElement {
 
     get $createPannel(): HTMLElement {
 
-        return this.shadowRoot.querySelector('.createPanel');
+        return this.querySelector('.createPanel');
 
     }
 
     get $addPanelEditorOption(): HTMLElement {
 
-        return this.shadowRoot.querySelector('.addPanelEditorOption');
+        return this.querySelector('.addPanelEditorOption');
 
     }
 
     get $options(): HTMLElement {
 
-        return this.shadowRoot.querySelector('.options');
+        return this.querySelector('.options');
 
     }
 
     get $form(): HTMLFormElement {
 
-        return this.shadowRoot.querySelector('form');
+        return this.querySelector('form');
 
     }
 

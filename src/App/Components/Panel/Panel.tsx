@@ -3,6 +3,7 @@ import { CustomElementDecorator } from "../../../Shared/CustomElement/CustomeEle
 import { PanelType } from "../PanelType/PanelType";
 import { Component } from "../../../Shared/Component/Component";
 import { ComponentRender } from "../../../Shared/Component/ComponentRender";
+import style from './style.scss';
 
 
 interface PanelPosition {
@@ -51,35 +52,9 @@ export class Panel extends HTMLElement {
 
     }
 
-    style() {
-
-        return `
-        .panel {
-            min-width: 200px;
-            position: absolute;
-            border-radius: 2px;
-            min-height: 200px;
-            border: 1px solid #000;
-            background-color: #333;
-        }
-        .panel__title {
-            font-size: 12px;
-            line-height: 20px;
-            padding: 4px;
-            min-height: 20px;
-            font-weight: bold;
-            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 0%, #333 50%);
-            margin: 0;
-            border-bottom: 1px solid #cacaca;
-            color: #FFF;
-        }`;
-
-
-    }
-
     get $el() {
 
-        return this.shadowRoot.querySelector('.panel');
+        return this.querySelector('.panel');
 
     }
 
@@ -125,7 +100,7 @@ export class Panel extends HTMLElement {
 
     get $title(): HTMLElement {
 
-        return this.shadowRoot.querySelector('h3');
+        return this.querySelector('h3');
 
     }
 

@@ -1,4 +1,5 @@
 import { h, diff, patch, create } from 'virtual-dom';
+import uuid from 'uuid';
 
 interface ComponentConfig {
     selector:string;
@@ -16,7 +17,6 @@ const validateSelector = (selector: string) => {
 export interface IComponent {
 
     render: (h: h) => any;
-    style: ?() => string;
 
 }
 
@@ -30,33 +30,22 @@ export const Component = (config: ComponentConfig) => (cls: IComponent) => {
 
     const connectedCallback = cls.prototype.connectedCallback || noop;
     const disconnectedCallback = cls.prototype.disconnectedCallback || noop;
-    const styleCallback = cls.prototype.style || noop;
     const renderCallback = cls.prototype.render || noop;
+    let partials = {};
 
     const render = function (tag = '', attr = {}) {
 
-        const content = Array.from(arguments).slice(2);
+        const content = Array.from(arguments).slice(2).map(el => {
+
+            if(typeof el.template !== 'function') return el;
+            const id = uuid();
+            partials[id] = el;
+
+            return h('div', {attributes: { component: id }}, '');
+
+        });
+
         return h(tag, attr, content);
-
-    }
-
-    cls.prototype.style = function(): HTMLElement {
-
-        const style = styleCallback.call(this);
-
-        if (!style) return false;
-
-        if (style typeof 'string') {
-
-            const tag = document.createElement('style');
-            tag.innerHTML = `
-@import "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css";
-${style}`;
-            return tag;
-
-        }
-
-        return style;
 
     }
 
@@ -68,31 +57,50 @@ ${style}`;
 
     };
 
+    cls.prototype.renderPartials = function() {
+
+        Object.keys(partials).forEach((id) => {
+
+            const child = partials[id];
+
+            if (Array.isArray(child)) {
+
+                child.forEach(el => {
+                    this.querySelector(`[component="${id}"]`).appendChild(el);
+                });
+
+                return;
+
+            }
+
+            this.querySelector(`[component="${id}"]`).appendChild(child);
+
+        });
+        partials = {};
+
+    }
+
     cls.prototype.render = function() {
 
-        const style = this.style();
         const content = this.template();
 
         const { _lastRender } = this;
 
-        if (this.shadowRoot) {
+        if (_lastRender) {
 
             const patches = diff(_lastRender, content);
             this.rootNode = patch(this.rootNode, patches);
             this._lastRender = content;
+            this.renderPartials();
 
             return;
         }
 
         this.rootNode = create(content);
         this._lastRender = content;
-        this.attachShadow({mode: 'open'});
-
-        if (style) {
-            this.shadowRoot.appendChild(style);
-        }
-
-        this.shadowRoot.appendChild(this.rootNode);
+        this.appendChild(this.rootNode);
+        this.renderPartials();
+        connectedCallback.call(this);
 
     };
 
@@ -103,7 +111,6 @@ ${style}`;
         }
 
         this.render();
-        connectedCallback.call(this);
 
         if (this.componentDidMount) {
             this.componentDidMount();

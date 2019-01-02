@@ -1,25 +1,10 @@
 import { CustomElementDecorator } from "../../../Shared/CustomElement/CustomeElement";
 import { observable, action } from "mobx";
 import { EPanelTypeOptionInputType, IPanelTypeOption } from "../PanelType/PanelType";
+import { Component } from "../../../Shared/Component/Component";
 
-@CustomElementDecorator({
+@Component({
     selector: 'panel-editor-option',
-    template: `
-<div>
-<label for="name">Name</label>
-<input type="text" name="name" />
-<label for="type">Type</label>
-<select name="type">
-    <option value="inputText">text</option>
-    <option value="inputSelect">select</option>
-    <option value="inputMultiSelect">multy select</option>
-    <option value="inputBoolean">boolean</option>
-</select>
-</div>
-`,
-    style: `
-`,
-    useShadow: true
 })
 export class PanelEditorOption extends HTMLElement {
 
@@ -34,14 +19,29 @@ export class PanelEditorOption extends HTMLElement {
 
     get $name(): HTMLInputElement {
 
-        return this.shadowRoot.querySelector('input');
+        return this.querySelector('input');
 
     }
 
     get $type(): HTMLSelectElement {
 
-        return this.shadowRoot.querySelector('select');
+        return this.querySelector('select');
 
+    }
+
+    render(h) {
+        return (
+            <div className="panel-editor-option">
+                <label for="name">Name</label>
+                <input type="text" name="name" />
+                <label for="type">Type</label>
+                <select name="type">
+                    <option value="inputText">text</option>
+                    <option value="inputSelect">select</option>
+                    <option value="inputMultiSelect">multy select</option>
+                    <option value="inputBoolean">boolean</option>
+                </select>
+            </div>);
     }
 
     @action.bound

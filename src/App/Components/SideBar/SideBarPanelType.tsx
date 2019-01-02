@@ -1,6 +1,7 @@
 import { observable, action, observe } from "mobx";
 import { PanelType } from "../PanelType/PanelType";
 import { Component } from "../../../Shared/Component/Component";
+import style from './style.scss';
 
 @Component({
     selector: 'sidebar-panel-type',
@@ -9,24 +10,15 @@ export class SideBarPanelType extends HTMLElement {
 
     @observable panelType: PanelType = new PanelType();
 
-    style() {
-       return `
-            div {
-                width: 100%;
-                height: 20px;
-            }
-       `;
-    }
-
     render(h) {
 
-        return <div draggable></div>;
+        return <div className="sidebar_panel-type" draggable></div>;
 
     }
 
     get $el() {
 
-        return this.shadowRoot.querySelector('div');
+        return this.querySelector('div');
 
     }
 

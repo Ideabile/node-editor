@@ -4,6 +4,7 @@ import { SideBarPanelType } from "./SideBarPanelType.tsx";
 import { PanelType } from "../PanelType/PanelType";
 import { Panel } from "../Panel/Panel";
 import { Component } from "../../../Shared/Component/Component";
+import style from "./style.scss";
 
 @Component({
     selector: 'side-bar',
@@ -13,54 +14,9 @@ export class SideBar extends HTMLElement {
 
     @observable panelTypes: IPanelType[] = [];
 
-    style() {
-        return `
-            .visually-hidden {
-                position: absolute;
-                left: -9999em;
-            }
-
-            .controls {
-                position: absolute;
-                top: 0;
-                right: -42px;
-                width: 40px;
-                border: 1px solid #ccc;
-            }
-
-            .controls button {
-                width: 40px;
-                height: 40px;
-            }
-
-            button {
-                background: white;
-                border: 1px solid #ccc;
-                font-size: 20px;
-            }
-
-            div {
-                margin: 0;
-                padding: 0;
-                position: fixed;
-                height: calc(100vh - 20px);
-                border-right: 2px solid #ccc;
-                background: white;
-                width: 180px;
-                padding: 10px;
-                top: 0;
-                left: -200px;
-            }
-
-            div.active {
-                left: 0;
-            }
-        `;
-    }
-
     render(h) {
 
-        return (<div>
+        return (<div className="sidebar">
             <section className="controls">
                 <button className="toggleSideBar">
                     <i className="fa fa-angle-left"></i>
@@ -79,25 +35,25 @@ export class SideBar extends HTMLElement {
 
     get $toggleSidebar(): HTMLElement {
 
-        return this.shadowRoot.querySelector('.toggleSidebar');
+        return this.querySelector('.toggleSidebar');
 
     }
 
     get $addPanelType(): HTMLElement {
 
-        return this.shadowRoot.querySelector('.addPanelType');
+        return this.querySelector('.addPanelType');
 
     }
 
     get $sidebar(): HTMLElement {
 
-        return this.shadowRoot.querySelector('div');
+        return this.querySelector('div.sidebar');
 
     }
 
     get $panelTypes(): HTMLElement {
 
-        return this.shadowRoot.querySelector('ul');
+        return this.querySelector('ul');
 
     }
 

@@ -19,6 +19,7 @@
   "dependencies": {
     "mobx": "^5.8.0",
     "normalize.css": "^8.0.1",
+    "uuid": "^3.3.2",
     "virtual-dom": "^2.1.1"
   }
 }

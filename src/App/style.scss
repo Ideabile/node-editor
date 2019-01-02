@@ -1,0 +1,33 @@
+.canvas {
+    position: absolute;
+    min-width: 100vw;
+    min-height: 100vh;
+}
+
+.app-panel-editor {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 0;
+}
+
+.app-panel-editor .body {
+    position: fixed;
+    margin: 0 20px;
+    width: calc(60% - 20px);
+    max-height: calc(94% - 20px);
+    overflow: scroll;
+    padding: 10px;
+    background: #fff;
+    border: 2px solid #ccc;
+}
+
+.app-panel-editor.active {
+    display: flex;
+}
